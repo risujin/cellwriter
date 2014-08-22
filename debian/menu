@@ -1,0 +1,6 @@
+?package(cellwriter): \
+       needs="X11" \
+       section="Applications/Accessibility" \
+       title="CellWriter" \
+       command="/usr/bin/cellwriter" \
+       icon="/usr/share/pixmaps/cellwriter.xpm"

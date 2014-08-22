@@ -1,0 +1,2 @@
+version=3
+http://code.google.com/p/cellwriter/downloads/list?can=1 .*/cellwriter-(\d[\d.]*)\.tar\.gz

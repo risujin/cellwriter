@@ -1,0 +1,58 @@
+
+Wishlist:
+
+  * Quake-style cvar system or use GConf or something
+  * SCIM/UIM style text box integration
+  * CJK language usability improvements:
+    - Simplify Asian character training
+    - Import Kanji samples from or support StrokeDic directly
+  * Translations
+  * Language chooser rather than Unicode pages (or along with?)
+
+For 2.0:
+
+  * Split into a library and a frontend
+
+For 1.6:
+
+  * Wordfreq improvements:
+    - Personal wordfreq file
+    - Multiple stock wordfreq files with selection GUI
+    - Wide-character cell_widget_word()
+  * Detailed training view
+  * Keyboard improvements:
+    - Localized keyboard layouts
+    - Visible internal compose key, 3rd level shift
+
+For 1.4:
+
+  * Automatic text entry after a timeout
+  * Configurable timeout intervals
+  * Test GDM with CellWriter (how is this done in Debian?)
+  * Rapid switch between language setups
+  * Docking options on the status icon
+  * Translucent when not active
+  * Keyboard looks weird with Clearlooks Terminal
+
+Bug Reports:
+
+  * Xorg 7.3/LinuxWacom 7.8.3 (patched) will crash the X server when
+    XChangeKeyboardMapping() is called! Test again when a 7.3-compatible
+    LinuxWacom makes it to Debian.
+
+  * Lots of issues with Xinput:
+    - Coordinate origins are messed up after Xrandr rotation
+    - The automatic window resize during writing occasionally messes up
+      coordinate origins
+    - Xorg 7.3/LinuxWacom 7.8.3 (patched) generates button 3 for left-click
+
+  * Icon cache does not appear to update after installing the Debian package.
+    Apparently a distribution-specific issue with CDBS.
+
+  * Window docking (moving window inside of struts) does not work with Metacity.
+
+  * Bottom-docked windows don't popup the back buffer menu correctly.
+    Appears to be a bug with Metacity itself.
+
+  * Docked windows overlap panels sometimes.
+

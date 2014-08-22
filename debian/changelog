@@ -1,0 +1,89 @@
+cellwriter (1.3.5-2) unstable; urgency=low
+
+  * New upstream release. (Closes: #690214)
+  * Switch to dpkg-source 3.0 (quilt) format.
+  * Switch to debhelper 9.
+  * debian/compat: update accordingly.
+  * debian/control:
+    + update debhlper versioned build-dep accordingly;
+    + drop build-dep on cdbs, now useless;
+    + add dep on librsvg2-common (Closes: #495976);
+    + add Uploaders field;
+    + bump Standards-Version to 3.9.4, no changes required.
+  * debian/rules: modify to use debhelper 9.
+  * debian/patches/: drop, not needed anymore.
+  * debian/copyright: update according to DEP5.
+  * debian/watch: add.
+
+ -- Andrea Colangelo <warp10@ubuntu.com>  Thu, 15 Nov 2012 12:17:11 +0100
+
+cellwriter (1.3.4-1.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Fix "FTBFS with binutils-gold": add patch from Ubuntu / Mahyuddin Susanto:
+    + debian/patches/binutils-gold.patch:
+      - fix FTBFS with ld --no-add-needed (LP: #696848)
+    (Closes: #554047)
+  * Fix "FTBFS: src/statusicon.c:215:17: error: format not a string
+    literal and no format arguments [-Werror=format-security]":
+    add patch fix-string-format-error.patch from Eric Alexander.
+    (Closes: #643362)
+
+ -- gregor herrmann <gregoa@debian.org>  Sun, 20 Nov 2011 14:40:26 +0100
+
+cellwriter (1.3.4-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Michael Levin <risujin@risujin.org>  Thu, 9 Jun 2008 12:34:00 -0500
+
+cellwriter (1.3.3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Michael Levin <risujin@risujin.org>  Thu, 25 Jan 2008 12:25:00 -0500
+
+cellwriter (1.3.2-1) unstable; urgency=low
+
+  * New upstream release
+  * Updated Standards-Version to 3.7.3
+
+ -- Michael Levin <risujin@risujin.org>  Thu, 24 Jan 2008 16:18:00 -0500
+
+cellwriter (1.3.1-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Michael Levin <risujin@risujin.org>  Fri, 30 Oct 2007 0:28:00 -0500
+
+cellwriter (1.3.0-1) unstable; urgency=low
+
+  * New upstream release
+    - Fixes problems under dark GTK themes (Closes: #446322)
+
+ -- Michael Levin <risujin@risujin.org>  Fri, 29 Oct 2007 22:49:00 -0500
+
+cellwriter (1.2.4-1) unstable; urgency=low
+
+  * New upstream release
+  * keyevent.c: Fixed warnings
+
+ -- Michael Levin <risujin@risujin.org>  Mon,  8 Oct 2007 10:46:00 -0500
+
+cellwriter (1.2.3-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Michael Levin <risujin@risujin.org>  Thu, 27 Sep 2007 11:12:00 -0500
+
+cellwriter (1.2.2-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Michael Levin <risujin@risujin.org>  Sun, 23 Sep 2007 10:45:21 -0500
+
+cellwriter (1.1.0-1) unstable; urgency=low
+
+  * Initial release (Closes: #441087, #441088)
+
+ -- Michael Levin <risujin@risujin.org>  Thu,  6 Sep 2007 13:12:44 -0500

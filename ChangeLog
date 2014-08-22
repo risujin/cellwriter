@@ -1,0 +1,248 @@
+2011-10-08  Michael Levin  <risujin@gmail.com>
+
+        Updates from SVN through r26:
+        * Allow entering Unicode blocks greater than 0xFFFF.
+        * Fixed multiple stroke inputs not working in the latest version of
+          Ubuntu.
+        * Updated email address.
+        * Removed GNOME dependency in favor of gtk_show_uri(). Without GNOME or
+          GTK 2.14 you just won't get the "help" button.
+        * Turkish translation for Desktop file (thanks ozbekanil!).
+        * Turn on window hints if struts are on, this seems to help people with
+          certain window managers (thanks Ronald)
+        * Fix for Korean languages
+        * Key text is now always white
+        * Window struts fix on 64-bit machines (thank you Huang Ying!)
+        * Add explicit libx11 dependency for binutils-gold
+        * Possible fix for profile not being saved correctly. Return code was
+          not being correctly checked.
+        * Added --ignore-fifo option to force starting a second instance.
+        * Sticky keys (shifts) now activate when the mouse pointer is outside of
+          the keyboard area so you can shift-click in GIMP etc.
+        * Removed 1hz polling of fifo, now checks for input using a GLib watch
+          (thanks to Thomas Jaeger for the patch!)
+        * CellWriter will toggle the main window when a second instance is
+          started instead of forcing the window to show. The --show-window and
+          --hide-window arguments can be used to force the window to show or
+          hide respectively. Thanks to Mattias Runge for the suggestion that
+          this was needed.
+
+        * Revision 1.3.5
+
+2008-05-28  Michael Levin  <risujin@risujin.org>
+
+        * stroke.c, averages.c: Fixed two memory leaks
+        * Revision 1.3.4
+
+2008-01-25  Michael Levin  <risujin@risujin.org>
+
+        * main.c: The standard library rename() function can't handle moving
+          across filesystems, this prevented the profile from being saved
+          correctly -- created a new function, move_file(), to handle this
+          case
+        * Revision 1.3.3
+
+2008-01-24  Michael Levin  <risujin@risujin.org>
+
+        * cellwidget.c: Pango does not properly cleanup a FreeType Font Map
+          object, this was causing a really nasty memory leak. CellWriter did
+          not need to recreate the Font Map on every configure event, however,
+          and removing this fixed the leak.
+        * cellwidget.c, keywidget.c, options.c: Style colors are now available
+          with GTK versions prior to 2.10. Should no longer get a black
+          background for the keyboard.
+        * main.c: Profiles are saved more carefully now -- a temporary file is
+          written first and then moved in place of the old profile
+        * Revision 1.3.2
+
+2007-11-22  Michael Levin  <risujin@risujin.org>
+
+        * cellwidget.c: Hold-click timeouts are no longer interrupted by other
+          timeouts and do not restart when the pointer is moved
+        * cellwidget.c: Timeouts are now half a second long
+        * options.c: Grid width limit raised to 48
+        * cellwidget.c, keywidget.c, keyevent.c: Keyboard mappings are now
+          updated before any key events are sent to catch any changes
+
+2007-10-30  Michael Levin  <risujin@risujin.org>
+
+        * main.c: Fixed a crash bug in a logging function (how typical...)
+        * main.c: Make sure the program folder exists before trying to create
+          the FIFO
+        * keywidget.c: Keyboard size now has a non-zero default
+        * main.c, common.h: Replaced some g_debug() calls with the new trace()
+          function that only prints at log level 8
+        * window.c, cellwidget.c: Docked window now fills the entire width of
+          the screen and leaves enough room for the scrollbar
+        * Revision 1.3.1
+
+2007-10-29  Michael Levin  <risujin@risujin.org>
+
+        * statusicon.c: Left-click status icon menu no longer on by default
+        * window.c, cellwidget.c: Added back buffer button to recall previously
+          entered input
+        * main.c: Include for errno.h was missing (probably was nested in
+          libgnome.h)
+        * window.c, keywidget.c, cellwidget.c, options.c: Disabled use of
+          style colors in GTK 2.8 compilation
+        * window.c, main.c: New option --xid allows CellWriter to embed within
+          gnome-screensaver, see:
+          http://live.gnome.org/GnomeScreensaver/FrequentlyAskedQuestions
+          #head-5196776d04ed41242da63723d837fa188d57693a
+        * window.c, options.c: The main window can now be docked to either the
+          top or the bottom of the screen. A new setup window and command-
+          line option (--dock-window=#) control this behavior.
+        * window.c, main.c: Can't figure out how to move the window within
+          its own struts with Metacity, going to leave it as an extra command-
+          line switch (--window-struts)
+        * main.c, singleinstance.c: CellWriter will now watch for input from
+          its fifo and react accordingly (see README)
+        * Unstable version 1.3.0
+
+2007-10-14  Michael Levin  <risujin@risujin.org>
+
+        * keyevent.c: Adding 1ms delay to XTestFakeKeyEvent() fixes mixed up
+          order on AMD64 Gentoo (thanks Stefan Baur!)
+        * window.c: Help label colors are taken from tooltip style
+        * keywidget.c: Key text is now bold and shadowed
+        * cellwidget.c, keywidget.c, options.c: A new option sets the colors
+          scheme based on the theme colors
+        * main.c: Added functions to manipulate colors in the HSL color space;
+          The color highlight method has been changed to use HSL
+        * Makefile.am, singleinstance.c, main.c: Added check to see if the
+          program is already running and show the window if it is
+        * README: Added recognition printout format from website
+        * statusicon.c: Combined statusicon_gtk.c and statusicon_libegg.c into
+          one source file.
+        * statusicon.c, options.c: Added option to show status icon menu on
+          left-click
+        * statusicon.c: LibEgg status icon is now sized correctly
+        * window.c, keywidget.c, cellwidget.c: Reduced the number of rendering
+          calls related to configure events and color changes
+        * window.c: Window is no longer allowed to initialize off-screen
+        * main.c, window.c, cellwriter.1: Added --window-x, and --window-y
+          command line arguments
+        * main.c, cellwriter.1, ...: Standardized logging system and partitioned
+          into GLib levels. Use --log-level=7 to enable full debug printouts.
+          Optionally divert output to a log file with --log-file=PATH.
+        * cellwidget.c: Sick of dealing with Xinput issues, disabling by
+          default
+        * main.c, keyevent.c, cellwriter.1: New command line argument
+          --disable-overwrite will prevent modifications to the keymap
+        * Revision 1.2.5
+
+2007-10-05  Michael Levin  <risujin@risujin.org>
+
+        * statusicon_*: Better error checking
+        * main.c, window.c, cellwriter.1: New command line options
+          --show-window, --hide-window, --keyboard-only, --profile, and
+          --read-only
+        * keyevent.c, keys.h, keywidget.c: Key event generation code now
+          releases the same KeyCode it pressed regardless of KeySym. Modifier
+          locking is now wholly internal. Real lock state and held keys are
+          checked and reset before generating any key event.
+        * keywidget.c: Lock keys change background color rather than icon.
+          Icons are a little larger. 'PSc' key is now Print Screen instead of
+          Sys Req. Meta ('Mta') key is now Super key ('Spr').
+        * cellwidget.c: Scrollbar-related crash bug fixed
+        * stroke.c: A memcpy should have been a memmove
+        * window.c, keywidget.c, options.c: Keyboard size is now independent of
+          cell size
+        * cellwidget.c, keyevent.c: Using XSync() seems to prevent rapidly
+          generated key events from interfering with each other. Replaced
+          key event generating timeouts with a loop. Should fix Xorg 7.3
+          problems as well.
+        * Revision 1.2.4
+
+2007-09-24  Michael Levin  <risujin@risujin.org>
+
+        * main.c, key_event.c: Error message if Xtest is not supported
+        * keyevent.c: Fixed keycode lookup bug related to shifting
+        * keyevent.c: Reports keysym used for keycode overwrites
+        * keyevent.c, keys.h: Removed KEY_EVENT_AUTO_SHIFT, we always
+          auto-shift if we can now
+        * keyevent.c: Fixed a nasty bug that prevented KeyCode black-listing
+          from working
+        * keyevent.c, keywidget.c: Num-lock shows toggle state, numpad keys
+          shift properly
+        * profile: Added bad KeyCode 245
+        * Revision 1.2.3
+
+2007-09-21  Michael Levin  <risujin@risujin.org>
+
+        * cellwidget.c: Fixed an issue with potential inserts/hold that could
+          cause the first point of a stroke to be invalid
+        * Revision 1.2.1
+        * configure.ac: Missing libgnome is no longer a fatal error, removed
+          --disable-xinput (which did nothing anyway)
+        * Revision 1.2.2
+
+2007-09-19  Michael Levin  <risujin@risujin.org>
+
+        * options.c: Spun off colors into a new tab, changed 'View' to
+          'Interface'
+        * configure.ac, cellwidget.c, options.c: Disabling Xinput is now a
+          run-time option
+        * cellwidget.c: Added hold-click context menu gesture
+        * cellwidget.c: Added change case context menu item, new context menu
+          arrangement
+        * Stable version 1.2.0
+
+2007-09-18  Michael Levin  <risujin@risujin.org>
+
+        * keyevent.c: Added check for adding too many keys to a KeyWidget
+        * cellwidget.c: Added full Xinput support back in
+        * configure.ac, cellwidget.c: Added back in an option to disable Xinput
+        * Revision 1.1.2
+
+2007-09-16  Michael Levin  <risujin@risujin.org>
+
+        * main.c, stroke.c, recognize.c, statusicon_*.c: Fixed some dangerous
+          type mistakes that caused crashes on 64-bit systems (thanks
+          Petr Ferschmann!)
+        * keyevent.c: Fixed non-Unicode support code
+        * Revision 1.1.1
+
+2007-09-15  Michael Levin  <risujin@risujin.org>
+
+        * cellwidget.c: Added cross-out gesture
+        * cellwidget.c, options.c: Added Right-to-Left language support
+        * AUTHORS: Credited EggTrayIcon author
+        * cellwidget.c: Possible fix to "can't write after using eraser" bug
+        * cellwidget.c: Changed default color scheme, untrained characters
+          now appear with inactive background in training mode
+        * Makefile.am, unix.c: Renamed unix.c to keyevent.c for clarity
+        * main.c, cellwidget.c, common.h: Moved GdkColor functions to main.c
+        * Makefile.am: Added keywidget.c, keys.h
+        * cellwidget.c, keywidget.c, window.c: Added small and QWERTY on-screen
+          keyboards
+        * keys.h: Header for keyevent.c and keywidget.c
+        * keyevent.c: Now supports sending a specific keysym
+        * options.c: Reorganized and added keyboard options
+        * window.c: Train and the new Keys buttons are now toggle buttons
+        * Unstable version 1.1.0
+
+2007-09-08  Michael Levin  <risujin@risujin.org>
+
+        * libegg/*, statusicon_gtk.c, statusicon_libegg.c, Autotools' files:
+          Created compatible tray icon using libegg to allow compilation using
+          GTK 2.8 and earlier.
+        * share/pixmaps/cellwriter.xpm: Debian menu file requires XPM format
+          for the menu icon.
+        * Revision 1.0.2
+        * cellwidget.c, configure.ac: New flag --disable-xinput will compile
+          CellWriter without extended input event support.
+        * Revision 1.0.3
+        * configure.ac: --disable-gnome changed to --without-gnome
+        * configure.ac, cellwidget.c: Removed --disable-xinput, XInput events
+          are now enabled only for eraser devices
+        * Revision 1.0.4
+
+2007-09-06  Michael Levin  <risujin@risujin.org>
+
+        * Fixed warnings for the Debian package.
+        * Revision 1.0.1
+
+2007-08-22  Michael Levin  <risujin@risujin.org>
+
+        * Initial release 1.0.0

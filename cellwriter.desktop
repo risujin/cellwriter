@@ -1,0 +1,14 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=1.0
+Name=CellWriter
+GenericName=Handwriting input panel
+GenericName[tr]=El Yazısı Giriş Paneli
+Comment=Grid-entry handwriting recognition input panel
+Comment[tr]=Izgara tabanlı el yazısı giriş paneli
+Exec=cellwriter
+Icon=cellwriter
+StartupNotify=true
+Terminal=false
+Type=Application
+Categories=GNOME;GTK;Utility;Accessibility;

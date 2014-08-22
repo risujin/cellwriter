@@ -1,0 +1,98 @@
+
+.\" This is the .TQ definition from the troff manpage, it is used to bundle
+.\" .TP definitions that have multiple left-hand-side parameters
+.de TQ
+.br
+.ns
+.TP \\$1
+..
+
+.TH CELLWRITER 1 "October 27, 2007"
+.SH NAME
+\fBcellwriter \fR\- grid-entry handwriting recognition input panel
+.SH SYNOPSIS
+.B cellwriter
+.RI [options]
+.SH DESCRIPTION
+CellWriter is a grid-entry natural handwriting recognition input panel.
+As you write characters into the cells, your writing is instantly recognized at
+the character level. When you press 'Enter' on the panel, the input you entered
+is sent to the currently focused application as if typed on the keyboard.
+.PP
+See the program website for details: http://risujin.org/cellwriter
+.SH OPTIONS
+The following options are provided by CellWriter using the standard GNU
+command line syntax:
+.TP
+\fB\-\-help\fR
+Prints the command line options.
+.TP
+\fB\-\-log\-level\fR=4
+Determines the detail level of log output:
+.br
+0 = Silent
+.br
+3 = Errors only
+.br
+4 = Warnings (default)
+.br
+5 = Informational messages
+.br
+7 = Debugging information
+.br
+8 = Function traces
+.TP
+\fB\-\-log\-file\fR=PATH
+Redirects log output from standard error to a file.
+.TP
+\fB\-\-xid\fR
+This option starts CellWriter in embedded mode. You can set gnome-screensaver
+to call CellWriter with this option to embed CellWriter into the unlock
+password prompt.
+.TP
+\fB\-\-profile\fR=filename
+Specifies the full path of a profile file to load instead of the user's.
+.TP
+\fB\-\-read\-only\fR
+Prevents changes from being saved to the profile.
+.TP
+\fB\-\-keyboard\-only\fR
+Places CellWriter in keyboard-only mode which prevents profile loading,
+suppresses the no-samples prompt, and only displays the full on-screen keyboard.
+.TP
+\fB\-\-show\-window\fR
+.TQ
+.BI \fB\-\-hide\-window\fR
+Show or hide the main window regardless of the saved profile setting.
+If an instance of CellWriter is already running, you can start a second
+instance of CellWriter with \fB\-\-hide\-window\fR to hide its window.
+.TP
+\fB\-\-window\-x\fR=X
+.TQ
+\fB\-\-window\-y\fR=Y
+Specify the position of the main window in pixels, overriding the profile
+setting.
+.TP
+\fB\-\-dock\-window\fR=N
+Controls window docking:
+.br
+0 = Not docked
+.br
+1 = Docked to top
+.br
+2 = Docked to bottom
+.TP
+\fB\-\-window\-struts\fR
+Sets the extended window manager struts hint when docking. This causes all
+other windows to be moved out of the docking area. This works with some
+window managers (XFWM4) but can cause severe problems with others (Metacity).
+.TP
+\fB\-\-disable\-overwrite\fR
+CellWriter needs to modify the X server keymap in order to generate keystrokes
+for Unicode characters that are not already in the user's keymap. This can
+potentially cause stability issues. Use this option to prevent CellWriter
+from modifying the keymap.
+.PP
+.SH AUTHOR
+Michael Levin <risujin@risujin.org>
+.PP

@@ -1,0 +1,176 @@
+
+CellWriter
+==========
+
+CellWriter is a grid-entry natural handwriting input panel. As you write
+characters into the cells, your writing is instantly recognized at the
+character level. When you press 'Enter' on the panel, the input you entered is
+sent to the currently focused application as if typed on the keyboard.
+
+Please see the website for more information: http://risujin.org/cellwriter
+
+Michael Levin <risujin@risujin.org>
+
+
+Reporting bugs
+==============
+
+If you find a bug, please follow this checklist:
+
+1.) Check the program website (above) to make sure you are using the latest
+    version and see if your problem is already described under the Support
+    section.
+
+2.) Make sure your system is running up-to-date stable versions of the X-server
+    (X11 7.2 at the moment) and supporting libraries. Instabilities in
+    supporting software can cause CellWriter to crash. These issues are further
+    difficult to work around.
+
+3.) Please find reliable steps to reproduce the problem. Run CellWriter with the
+    following arguments to produce a log file:
+
+        $ cellwriter --log-level=7 --log-file=cellwriter.log
+
+4.) If you are experiencing crashes and the log file simply says something like
+    "Caught signal 11, cleaning up", it would be very helpful if you could
+    try and find the exact location of the fault with a debugger. You will need
+    to install gdb (the GNU debugger) and compile the latest CellWriter source
+    code (see notes on compiling below). Once you have done so, start gdb from
+    the source directory:
+
+        $ gdb ./cellwriter
+
+    Enter 'r' to start the program. Try and reproduce the crash conditions.
+    When the program crashes, gdb will print out the location of the fault in
+    the source code. It looks something like this:
+
+        GNU gdb 6.6.90.20070912-debian
+        ...
+        (gdb) r
+        Starting program: /home/.../cellwriter-1.2.5/cellwriter
+        ...
+        Program received signal SIGSEGV, Segmentation fault.
+        [Switching to Thread 0xb701d6b0 (LWP 5419)]
+        0x08050863 in main (argc=1, argv=0xbfda35a4) at src/main.c:694
+        694             g_print("%s", error->message);
+        (gdb)
+
+    Save this output and send it to me via email. This is the fastest way to
+    help me fix a crash bug because it's difficult for me to fix crash
+    conditions that don't occur on my computer.
+
+5.) Send me an email (address listed above). Please include any relevant
+    information about your computer or handheld device (distribution, Xorg
+    version, Wacom driver version, etc). Don't forget to attach your log file!
+
+
+Notes on compiling
+==================
+
+CellWriter is packaged with Autotools. To compile and install use:
+
+        ./configure && make && make install
+
+If you are NOT planning to install the software but want to run it from the
+source directory, you need to configure CellWriter to use the local data
+directory. When you run the configure script, pass the absolute path to the
+'share' subdirectory to the script:
+
+        ./configure --datadir=/home/[user]/.../cellwriter/share
+
+If you do not do this, CellWriter will not be able to load the tray icon or
+the word frequency file.
+
+CellWriter has additional compile-time flags. To see what they are, type:
+
+        ./configure --help
+
+
+Embedding in GNOME Screensaver
+==============================
+
+With the 1.3 series, CellWriter can be embedded into GNOME Screensaver. To
+enable this functionality you will need to open the GNOME Configuration
+Editor:
+
+        gconf-editor
+
+Open the GNOME Screensaver entry (/apps/gnome-screensaver/) and set the
+'embedded_keyboard_command' key to the the CellWriter path and executable name
+with the '--xid' and '--keyboard-only' flags appended:
+
+        /usr/bin/cellwriter --xid --keyboard-only
+
+Check the 'embedded_keyboard_enabled' option and CellWriter should be
+embedded in keyboard-only mode (for security) within GNOME Screensaver next
+time it starts.
+
+Currently, CellWriter cannot open the Options dialog or enter training mode
+while embedded.
+
+
+Recognition results format
+==========================
+
+If you want to know more about what the recognition engine is doing under the
+hood, start CellWriter from a console with the debug logging level
+(cellwriter --log-level=7) and detailed information will be printed to standard
+out after a character is recognized. Here is some sample output:
+
+Recognized -- 71/87 (81%) disqualified, 21ms (1ms/symbol), 37% strong
+'k' ( 100 [30587], 100 [32722],  69 [21491],  33 [   17])  79% [000---012]
+'K' (  58 [29191],  38 [32672], 100 [26191],   0 [    0])  42% [012---000]
+'M' (  77 [29845],   4 [32645],  -2 [10154],   0 [    0])  16% [000R--012]
+'P' (  15 [27757], -12 [32631],  52 [18831],   0 [    0])   8% [011--R001]
+'d' (  45 [28759],  -8 [32634], -23 [ 6823],   0 [    0])   2% [000RR-102]
+
+The top stat shows how many samples were disqualified before performing detailed
+recognition (71). Next is the total time of recognition in milliseconds (21ms).
+Strength is defined as the match strength of the first result minus the second
+(79% - 42% = 37% strong).
+
+For each letter, the ratings of the four recognition engines are displayed in
+normalized (0-100) and raw form (in brackets, [0-32767]). From left to right are
+the preprocessor, average distance, average angle, and word context engines.
+After the engine ratings is the post-penalty strength. Lastly is the mapping
+transformation in brackets.
+
+The mapping transformation describes how the preprocessor mapped a symbol with
+more strokes onto a symbol with less strokes. The first set of columns describe
+which stroke on the larger symbol was mapped to which stroke on the smaller
+symbol. The next set of columns indicate whether any stroke was reversed ('R').
+If any two or more strokes on the larger symbol were mapped to the same stroke
+on the smaller symbol, the column set on the end indicates the order in which
+the strokes were glued together.
+
+In the example above, a sample for the character 'k' was rated highest by the
+preprocessor, average distance, and word frequency engines, but only
+second-highest by the average angle distance. After penalties, it had a
+strength of 79%, 37% above 'K', and was constructed by gluing together the
+three input strokes in order without reversal.
+
+
+Controlling via FIFO
+====================
+
+Since 1.3, CellWriter will watch its FIFO (~/.cellwriter/fifo) for input. The
+main window can be controlled by writing one character to the fifo file.
+
+To show the main window:
+
+        $ echo -n S > ~/.cellwriter/fifo
+
+To hide the main window:
+
+        $ echo -n H > ~/.cellwriter/fifo
+
+To toggle the main window:
+
+        $ echo -n T > ~/.cellwriter/fifo
+
+
+Thanks
+======
+
+Big thanks to Nelson A. de Oliveira for his continuing support!
+
