@@ -76,7 +76,7 @@
 #define PACKAGE_NAME "CellWriter"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "CellWriter 1.3.5"
+#define PACKAGE_STRING "CellWriter 1.3.6"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "cellwriter"
@@ -85,7 +85,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.3.5"
+#define PACKAGE_VERSION "1.3.6"
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void
@@ -97,7 +97,7 @@
 /* #undef USING_LIBEGG */
 
 /* Version number of package */
-#define VERSION "1.3.5"
+#define VERSION "1.3.6"
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */

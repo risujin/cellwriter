@@ -234,11 +234,17 @@ void highlight_gdk_color(const GdkColor *base, GdkColor *out, double value)
 /* Profile format version */
 #define PROFILE_VERSION 0
 
+/* The profile filename not including the path or postfix */
+#define PROFILE_FILENAME "profile"
+
+/* Added to the end of the profile backup filename */
+#define BACKUP_POSTFIX ".backup"
+
 int profile_read_only, keyboard_only = FALSE;
 
 static GIOChannel *channel;
 static char profile_buf[4096], *profile_end = NULL, profile_swap,
-            *force_profile = NULL, *profile_tmp = NULL;
+            *force_profile = NULL;
 static int force_read_only;
 
 static int is_space(int ch)
@@ -259,8 +265,11 @@ static int profile_open_channel(const char *type, const char *path)
         }
         channel = g_io_channel_new_file(path, profile_read_only ? "r" : "w",
                                         &error);
-        if (!error)
+        if (!error) {
+                g_debug("Opened %s profile '%s' for %s",
+                        type, path, profile_read_only ? "reading" : "writing");
                 return TRUE;
+        }
         g_warning("Failed to open %s profile '%s' for %s: %s",
                   type, path, profile_read_only ? "reading" : "writing",
                   error->message);
@@ -288,20 +297,40 @@ static int profile_open_read(void)
         profile_read_only = TRUE;
 
         /* Try opening a command-line specified profile first */
-        if (force_profile &&
-            profile_open_channel("command-line specified", force_profile))
-                return TRUE;
+        if (force_profile) {
+                if (profile_open_channel("command-line specified",
+                                         force_profile))
+                        return TRUE;
+
+                /* Try opening a backup of the command-line specified profile */
+                path = g_build_filename(force_profile, BACKUP_POSTFIX, NULL);
+                if (profile_open_channel("backup of command-line specified",
+                                         path)) {
+                        g_free(path);
+                        return TRUE;
+                }
+        }
 
         /* Open user's profile */
-        path = g_build_filename(g_get_home_dir(), "." PACKAGE, "profile", NULL);
+        path = g_build_filename(g_get_home_dir(), "." PACKAGE,
+                                PROFILE_FILENAME, NULL);
         if (profile_open_channel("user's", path)) {
                 g_free(path);
                 return TRUE;
         }
         g_free(path);
 
+        /* Open user's backup profile */
+        path = g_build_filename(g_get_home_dir(), "." PACKAGE,
+                                PROFILE_FILENAME BACKUP_POSTFIX, NULL);
+        if (profile_open_channel("user's backup", path)) {
+                g_free(path);
+                return TRUE;
+        }
+        g_free(path);
+
         /* Open system profile */
-        path = g_build_filename(PKGDATADIR, "profile", NULL);
+        path = g_build_filename(PKGDATADIR, PROFILE_FILENAME, NULL);
         if (profile_open_channel("system", path)) {
                 g_free(path);
                 return TRUE;
@@ -311,44 +340,21 @@ static int profile_open_read(void)
         return FALSE;
 }
 
-static int profile_open_write(void)
-/* Open a temporary profile file for writing. Returns TRUE if the profile was
-   opened successfully. */
-{
-        GError *error;
-        gint fd;
-
-        if (force_read_only) {
-                g_debug("Not saving profile, opened in read-only mode");
-                return FALSE;
-        }
-        profile_read_only = FALSE;
-
-        /* Open a temporary file as a channel */
-        error = NULL;
-        fd = g_file_open_tmp(PACKAGE ".XXXXXX", &profile_tmp, &error);
-        if (error) {
-                g_warning("Failed to open tmp file while saving "
-                          "profile: %s", error->message);
-                return FALSE;
-        }
-        channel = g_io_channel_unix_new(fd);
-        if (!channel) {
-                g_warning("Failed to create channel from temporary file");
-                return FALSE;
-        }
-
-        return TRUE;
-}
-
 static int move_file(char *from, char *to)
-/* The standard library rename() cannot move across filesystems so we need a
-   function that can emulate that. This function will copy a file, byte-by-byte
-   but is not as safe as rename(). */
+/* First tries to rename the file to the new location. The standard library
+   rename() cannot move across filesystems so we need a backup that can do that.
+   This function will copy a file, byte-by-byte if necessary. */
 {
         GError *error = NULL;
         GIOChannel *src_channel, *dest_channel;
         gchar buffer[4096];
+        int errno;
+
+        /* First try to rename the file to the destination */
+        errno = rename(from, to);
+        if (!errno)
+                return TRUE;
+        log_errno("rename() failed to move the file");
 
         /* Open source file for reading */
         src_channel = g_io_channel_new_file(from, "r", &error);
@@ -402,66 +408,58 @@ static int move_file(char *from, char *to)
         return TRUE;
 }
 
-static int profile_close(void)
-/* Close the currently open profile and, if we just wrote the profile to a
-   temporary file, move it in place of the old profile */
+static int profile_open_write(void)
+/* Open a temporary profile file for writing. Returns TRUE if the profile was
+   opened successfully. */
 {
-        char *path = NULL;
+        GError *error;
+        char *path;
+        char *backup_path;
 
-        if (!channel)
-                return FALSE;
-        g_io_channel_unref(channel);
-
-        if (!profile_tmp || profile_read_only)
-                return TRUE;
-
-        /* For some bizarre reason we may not have managed to create the
-           temporary file */
-        if (!g_file_test(profile_tmp, G_FILE_TEST_EXISTS)) {
-                g_warning("Tmp profile '%s' does not exist", profile_tmp);
+        if (force_read_only) {
+                g_debug("Not saving profile, opened in read-only mode");
                 return FALSE;
         }
+        profile_read_only = FALSE;
 
         /* Use command-line specified profile path first then the user's
            home directory profile */
         path = force_profile;
         if (!path)
                 path = g_build_filename(g_get_home_dir(),
-                                        "." PACKAGE, "profile", NULL);
+                                        "." PACKAGE, PROFILE_FILENAME, NULL);
 
-        if (g_file_test(path, G_FILE_TEST_EXISTS)) {
-                g_message("Replacing '%s' with '%s'", path, profile_tmp);
-
-                /* Don't write over non-regular files */
-                if (!g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
-                        g_warning("Old profile '%s' is not a regular file",
-                                  path);
-                        goto error_recovery;
-                }
-
-                /* Remove the old profile */
-                if (remove(path)) {
-                        log_errno("Failed to delete old profile");
-                        goto error_recovery;
-                }
-        }
-        else
-                g_message("Creating new profile '%s'", path);
-
-        /* Move the temporary profile file in place of the old one */
-        if (rename(profile_tmp, path)) {
-                log_errno("rename() failed to move tmp profile in place");
-                if (!move_file(profile_tmp, path))
-                        goto error_recovery;
+        /* Backup the current profile, if it exists */
+        if (g_file_test(path, G_FILE_TEST_IS_REGULAR) &&
+            g_file_test(path, G_FILE_TEST_EXISTS)) {
+                backup_path = g_strconcat(path, BACKUP_POSTFIX, NULL);
+                if (!move_file(path, backup_path))
+                        g_warning("Failed to backup the profile");
+                else
+                        g_debug("Backed up profile '%s' to '%s'", path,
+                                backup_path);
+                g_free(backup_path);
+        } else {
+          g_debug("No profile found, not backing up");
         }
 
-        if (path != force_profile)
+        /* Open user's profile */
+        if (profile_open_channel("user's", path)) {
                 g_free(path);
-        return TRUE;
-
-error_recovery:
-        g_warning("Recover tmp profile at '%s'", profile_tmp);
+                return TRUE;
+        }
+        g_free(path);
+        g_warning("Failed to open profile for writing: %s", error->message);
         return FALSE;
+}
+
+static int profile_close(void)
+/* Close the currently open profile */
+{
+        if (!channel)
+                return FALSE;
+        g_io_channel_unref(channel);
+        return TRUE;
 }
 
 const char *profile_read(void)
@@ -679,6 +677,20 @@ static int catch_signals[] = {
         -1
 };
 
+/* Save the profile */
+void save_profile(void) {
+        if (!window_embedded && profile_open_write()) {
+                unsigned int i;
+
+                profile_write(va("version %d\n", PROFILE_VERSION));
+                for (i = 0; i < NUM_PROFILE_CMDS; i++)
+                        if (profile_cmds[i].write_func)
+                                profile_cmds[i].write_func();
+                if (profile_close())
+                        g_debug("Profile saved");
+        }
+}
+
 void cleanup(void)
 {
         static int finished;
@@ -697,18 +709,7 @@ void cleanup(void)
         key_event_cleanup();
         if (!window_embedded)
                 single_instance_cleanup();
-
-        /* Save profile */
-        if (!window_embedded && profile_open_write()) {
-                unsigned int i;
-
-                profile_write(va("version %d\n", PROFILE_VERSION));
-                for (i = 0; i < NUM_PROFILE_CMDS; i++)
-                        if (profile_cmds[i].write_func)
-                                profile_cmds[i].write_func();
-                if (profile_close())
-                        g_debug("Profile saved");
-        }
+        save_profile();
 
         /* Close log file */
         if (log_file)

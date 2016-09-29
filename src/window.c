@@ -60,6 +60,8 @@ int status_icon_embedded(void);
 /* main.c */
 extern int keyboard_only;
 
+void save_profile(void);
+
 /* keywidget.c */
 void key_widget_resize(KeyWidget *key_widget);
 
@@ -371,6 +373,10 @@ void train_button_toggled(void)
                 gtk_widget_show(keys_button);
                 gtk_widget_show(insert_button);
                 gtk_widget_show(buffer_button);
+
+                /* Take the opportunity to save training data.
+                   TODO: Only save if there is new training data. */
+                save_profile();
         }
 }
 
