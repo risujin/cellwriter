@@ -1,3 +1,10 @@
+2017-05-22  Michael Levin  <risujin@gmail.com>
+
+        * Instead of creating a temporary file and moving it into place, create
+          a backup of the old profile and write directly to the final location.
+          Attempt to load the backup if the primary profile load fails.
+        * Revision 1.3.6
+
 2011-10-08  Michael Levin  <risujin@gmail.com>
 
         Updates from SVN through r26:
